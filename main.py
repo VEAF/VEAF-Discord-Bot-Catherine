@@ -1,8 +1,8 @@
 #coding:utf-8
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
-#Last modified the 21/05/2021 @ 16:21
-#Version 1.0
+#Last modified the 21/05/2021 @ 19:55
+#Version Alpha 0.2
 
 import random
 import os
@@ -18,7 +18,7 @@ print("VEAF Bot is starting...")
 os.system("title VEAF Bot")
 os.system("color 03")
 
-liste = ["1 + 1 = 2 (Ou 11 par fois)", #Cette liste est inutile, mais ne la supprimez pas !
+liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not delete it !
 "VEAF veut dire 'Virtual European Air Force'",
 "Les cookies c'est très bon !",
 "Ce bot à été développé par Mikcael (Il est beau)",
@@ -34,14 +34,14 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #Cette liste est inutile, mais ne la supp
 
 
 
-print("Welcome ! (Current version is 1.0)") #Version actuelle du bot
+print("Welcome ! (Current version is Alpha 0.2)") #Current version
 
-client = commands.Bot(command_prefix = "&") #Changez le "&" pour changer le préfix du bot
+client = commands.Bot(command_prefix = "&") #Change the "&" to change the bot's prefix
 
 
 @client.event
 async def on_ready():
-	print('We have logged in as {0.user}'.format(client)) #Ce message est envoyé quand le bot est prêt à fonctionné
+	print('We have logged in as {0.user}'.format(client)) #This message is shown on the console when the bot is ready
 	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
 
 
@@ -51,7 +51,7 @@ async def on_ready():
 @commands.cooldown(1, 100, commands.BucketType.user)
 async def act(ctx, *, descInput ="Rien"): 
 	'''
-	La commande &act est une commande qui permet de créer une activité
+	The command &act is a commande to create an activity
 	'''
 	channel = client.get_channel(845299069882728500)
 	auteur = (ctx.author.name)
@@ -79,6 +79,33 @@ async def act(ctx, *, descInput ="Rien"):
 	save = f"La commande \"&act\" à été exectué avec succès par {auteur} ({ctx.author.id}), contenu :\n Description : {descInput.content}\n Date et heure : {dateInput.content} de {heureDebutInput.content} à {heureFinInput.content}"
 	print(save)
 
+
+@client.command()
+@commands.has_permissions(send_messages = True)
+#@commands.has_any_role('Cadet', "Membres VEAF")
+@commands.cooldown(1, 100, commands.BucketType.user)
+async def acti(ctx, *descInput): 
+	'''
+	The command &acti is a commande to create an activity
+	'''
+	content = " ".join(descInput)
+	channel = client.get_channel(845299069882728500)
+	auteur = (ctx.author.name)
+	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
+	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{content}\n\nRépondez avec la réaction \"✅\" si cette activité vous intéresse", color=0xDCAB00)
+#	embed.set_author(name="VEAF Bot")
+	embed.set_thumbnail(url = ctx.author.avatar_url)
+#	embed.add_field(name = "Date", value = dateInput.content)
+#	embed.add_field(name = "Heure", value = f"De {heureDebutInput.content} à {heureFinInput.content}")
+	embed.set_footer(text = random.choice(liste))
+	message = await channel.send(embed = embed)
+	await message.add_reaction("✅")
+	embed = discord.Embed(title=f"La commande a été exectué avec succès par {auteur}")
+	ctx.send("La commande a étét exectué avec succès")
+	save = f"La commande \"&act\" a été exectué avec succès par {auteur} ({ctx.author.id}), contenu :\n Description : {content}"
+	print(save)
+
+
 @client.command()
 @commands.has_permissions(send_messages = True)
 @commands.cooldown(1, 10, commands.BucketType.user)
@@ -94,9 +121,8 @@ async def aide(ctx):
 	embed.set_thumbnail(url = "https://bit.ly/3oyArah")
 	await ctx.send(embed = embed)
 
-'''
-Commande d'administration
-'''
+
+
 
 @client.command()
 @commands.has_permissions(manage_messages = True)
@@ -127,7 +153,10 @@ async def serverinfo(ctx):
 	embed.set_thumbnail(url = ctx.guild.icon_url)
 	await ctx.send(embed = embed)
 
-
+@client.command()
+@commands.cooldown(1, 3, commands.BucketType.user)
+async def say(ctx, *, msg=""):
+	await ctx.send(msg)
 
 
 @client.event
@@ -151,7 +180,7 @@ async def on_command_error(ctx, error):
 
 
 token = open("token.txt","r").readline() 
-client.run(token) #/!\ CETTE LIGNE N'EST A SURTOUT PAS PARTAGER /!\
+client.run(token) #/!\ DO NOT SHARE YOUR TOKEN ! /!\
 
-print("\n\n\n VEAF Bot is shutting down... Bye bye !") #Le bot s'éteint
-os.system("color 07") #La console ce remet en blanc
+print("\n\n\n VEAF Bot is shutting down... Bye bye !") #The bot is shutting down...
+os.system("color 07")
