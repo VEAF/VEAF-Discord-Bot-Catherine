@@ -34,7 +34,7 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #Cette liste est inutile, mais ne la supp
 
 
 
-print("Welcome ! (Current version is 0.1)") #Version actuelle du bot
+print("Welcome ! (Current version is 1.0)") #Version actuelle du bot
 
 client = commands.Bot(command_prefix = "&") #Changez le "&" pour changer le préfix du bot
 
@@ -51,24 +51,24 @@ async def on_ready():
 @commands.cooldown(1, 100, commands.BucketType.user)
 async def act(ctx, *, descInput ="Rien"): 
 	'''
-	La commande &act est une commande qui permet de créer une activitée
+	La commande &act est une commande qui permet de créer une activité
 	'''
 	channel = client.get_channel(845299069882728500)
 	auteur = (ctx.author.name)
 	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
-	await ctx.send("Quel est votre activitée (Description, Timeout is 2000 seconds)")
+	await ctx.send("Quel est votre activité (Description, Timeout is 2000 seconds)")
 	descInput = await client.wait_for("message", timeout = 2000)
 
-	await ctx.send("Quel est la date de votre activitée ``(Format : Jour/Mois)`` ? ``(Timeout is 30 seconds)``")
+	await ctx.send("Quel est la date de votre activité ``(Format : Jour/Mois)`` ? ``(Timeout is 30 seconds)``")
 	dateInput = await client.wait_for("message", timeout = 30)
 
-	await ctx.send("A quel heure commence votre activitée ``(Format : HH:MM)`` ? ``(Timeout is 30 seconds)``")
+	await ctx.send("A quel heure commence votre activité ``(Format : HH:MM)`` ? ``(Timeout is 30 seconds)``")
 	heureDebutInput = await client.wait_for("message", timeout = 30)
 
-	await ctx.send("A quel heure se termine votre activitée ``(Format : HH:MM)`` ? (Timeout is 30 seconds)``")
+	await ctx.send("A quel heure se termine votre activité ``(Format : HH:MM)`` ? (Timeout is 30 seconds)``")
 	heureFinInput = await client.wait_for("message", timeout = 30)
 
-	embed = discord.Embed(title=f"**Activitée de {auteur}**", description=f"{descInput.content}\n\nRépondez avec la réaction \"✅\" si cette activitée vous intéresse", color=0xDCAB00)
+	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{descInput.content}\n\nRépondez avec la réaction \"✅\" si cette activité vous intéresse", color=0xDCAB00)
 #	embed.set_author(name="VEAF Bot")
 	embed.set_thumbnail(url = ctx.author.avatar_url)
 	embed.add_field(name = "Date", value = dateInput.content)
@@ -150,8 +150,8 @@ async def on_command_error(ctx, error):
 #client.loop.create_task(update_presence())
 
 
-
-client.run(YOUR TOKEN HERE) #/!\ CETTE LIGNE N'EST A SURTOUT PAS PARTAGER /!\
+token = open("token.txt","r").readline() 
+client.run(token) #/!\ CETTE LIGNE N'EST A SURTOUT PAS PARTAGER /!\
 
 print("\n\n\n VEAF Bot is shutting down... Bye bye !") #Le bot s'éteint
 os.system("color 07") #La console ce remet en blanc
