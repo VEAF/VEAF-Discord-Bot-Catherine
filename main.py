@@ -2,7 +2,7 @@
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
 #Last modified the 21/05/2021 @ 19:55
-#Version Alpha 0.2
+#Version Alpha 0.2b
 
 import random
 import os
@@ -30,11 +30,20 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 "La Terre est ronde (Enfin je crois)",
 "Bim bam boum",
 "Ce bot a été fait en Python 3.9",
-"Les pates c'est bon (Enfin moi j'aime bien)"]
+"Les pates c'est bon (Enfin moi j'aime bien)",
+"Besoin d'aide, faites &aide",
+"Le Huey a fait son premier vol le 22 octobre 1956",
+"Le F18 a fait son premier vol le 18 novembre 1978",
+"Le canon du F14 a un canon M61A1 Vulcan de 20 mm",
+"Le F-14AM est une version améliorer du F14 effectuée par l'Iran, il est équipé de nouveaux missiles Fakour 90",
+"Le A10 était initialement nommé le YA-10A",
+"La premier atmosphérique normal est de 1013 hpa",]
 
 
 
 print("Welcome ! (Current version is Alpha 0.2)") #Current version
+print(time.strftime("Démarrage le %d/%m/%Y à %H:%I:%S, %Z"))
+
 
 client = commands.Bot(command_prefix = "&") #Change the "&" to change the bot's prefix
 
@@ -44,9 +53,13 @@ async def on_ready():
 	print('We have logged in as {0.user}'.format(client)) #This message is shown on the console when the bot is ready
 	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
 
+def wrong_channel(ctx):
+	return ctx.message.channel.id == 845299225742540820
+
 
 @client.command()
 @commands.has_permissions(send_messages = True)
+@commands.check(wrong_channel)
 #@commands.has_any_role('Cadet', "Membres VEAF")
 @commands.cooldown(1, 100, commands.BucketType.user)
 async def act(ctx, *, descInput ="Rien"): 
@@ -82,12 +95,14 @@ async def act(ctx, *, descInput ="Rien"):
 
 @client.command()
 @commands.has_permissions(send_messages = True)
+@commands.check(wrong_channel)
 #@commands.has_any_role('Cadet', "Membres VEAF")
 @commands.cooldown(1, 100, commands.BucketType.user)
 async def acti(ctx, *descInput): 
 	'''
 	The command &acti is a commande to create an activity
 	'''
+
 	content = " ".join(descInput)
 	channel = client.get_channel(845299069882728500)
 	auteur = (ctx.author.name)
@@ -106,14 +121,19 @@ async def acti(ctx, *descInput):
 	print(save)
 
 
+
+#It's a basic &help command
 @client.command()
 @commands.has_permissions(send_messages = True)
+@commands.check(wrong_channel)
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def aide(ctx):
 	embed = discord.Embed(title=f"Documentation du bot :", description=f"Voici la liste des information importante :", color = 0xFF00FF)
 	embed.add_field(name = "Préfix : &", value = "Le préfix est a utliliser a chaque début de commmande\n ``Exemple : &commande``", inline=False)
 	embed.add_field(name = "Commande act", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\"\n ``Utilisation : &act``", inline=True)
+	embed.add_field(name = "Commande acti", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\" en une seule ligne\n ``Utilisation : &acti [description]``", inline=True)
 	embed.add_field(name = "Commande aide", value = "Cette commande permet d'afficher ce que vous êtes entrain de lire !\n ``Utilisation : &aide``", inline=True)
+	embed.add_field(name = "Commande say", value = "Cette commande permet de me faire dire ce que vous voulez\n ``Utilisation : &say [message]``", inline=True)
 	embed.add_field(name = "Commande clear", value = "Cette commande permet de supprimer les derniers messages envoyés dans le salon ou elle est exectué\n ``Utilisation : &clear [number]``", inline=True)
 	embed.add_field(name = "Commande Serverinfo", value = "Cette commande permet d'afficher des informations sur le serveur\n ``Utilisation : &serverinfo``", inline=True)
 	embed.add_field(name = "Commande où effetuer les commandes ?", value = "Vous devez effectuer les commandes de le salon ``:Salon Prévu a cette effet:``", inline=False)
@@ -123,7 +143,7 @@ async def aide(ctx):
 
 
 
-
+#Purge messages
 @client.command()
 @commands.has_permissions(manage_messages = True)
 @commands.cooldown(1, 2, commands.BucketType.user)
@@ -132,6 +152,8 @@ async def clear(ctx, number : int):
 	embed = discord.Embed(title=f"♻️  **{number}** messages ont été supprimés avec succès  ♻️", color=0x00ff80)
 	await ctx.send(embed = embed)
 
+
+#Show server information
 @client.command()
 @commands.has_permissions(manage_guild = True)
 @commands.cooldown(1, 10, commands.BucketType.user)
@@ -153,33 +175,92 @@ async def serverinfo(ctx):
 	embed.set_thumbnail(url = ctx.guild.icon_url)
 	await ctx.send(embed = embed)
 
+
+#Send the message you want
 @client.command()
 @commands.cooldown(1, 3, commands.BucketType.user)
 async def say(ctx, *, msg=""):
 	await ctx.send(msg)
 
 
+#Settings Command (To Do)
+#ReadyRoomChannel = ""
+#
+#with open('Data/ReadyRoomChannel.txt', 'r') as datafile:
+#	ReadyRoomChannel = datafile.read()
+#
+#CommandChannel = ""
+#
+#with open('Data/CommandChannel.txt', 'r') as datafile:
+#	CommandChannel = datafile.read()
+#
+#
+#
+#@client.command()
+#async def settings(ctx, setting, *arg):
+#	global ReadyRoomChannel
+#	global CommandChannel
+#	if setting == "ReadyRoomChannel":
+#		ReadyRoomChannel = arg
+#		with open('Data/ReadyRoomChannel.txt', 'w') as datafile:
+#			datafile.write(str(ReadyRoomChannel))
+#	if setting == "CommandChannel":
+#		CommandChannel = arg
+#		with open('Data/CommandChannel.txt', 'w') as datafile:
+#			datafile.write(str(CommandChannel))
+#	print(ReadyRoomChannel)
+#	print(CommandChannel)
+#	return ReadyRoomChannel and CommandChannel
+
+
+
+
+#Error management
 @client.event
 async def on_command_error(ctx, error):
+	print(error)
 	if isinstance(error, commands.CommandOnCooldown):
-		await ctx.send(f"Cette commande est en cooldown, vous pourrez l'exectuter dans {round(error.retry_after, 1)} secondes")
-	elif isinstance(error, commands.CommandOnCooldown):
-		await ctx.send(f"Cette commande est en cooldown, vous pourrez l'exectuter dans {round(error.retry_after, 1)} secondes")
+		await ctx.send(f"Cette commande est en cooldown, vous pourrez l'exectuter dans {round(error.retry_after, 1)} secondes (CommandOnCooldown)")
+	elif isinstance(error, commands.MissingRequiredArgument):
+		await ctx.send("Au moins un argument est manquant (MissingRequiredArgument)")
+	elif isinstance(error, commands.MissingPermissions):
+		await ctx.send("Vous ne possédez pas les permissions requise pour exectuer cette commande ! (MissingPermissions)")
+	elif isinstance(error, commands.CheckFailure):
+		await ctx.send("Une erreur est survenue, si le problème persiste, veuillez contacter le développeur (CheckFailure)")
+	elif isinstance(error, commands.CommandNotFound):
+		await ctx.send("Impossible de trouver votre commande, verifiez l'orthographe et réessayez, si le problème persiste, exectuez la commande &aide (CommmandNotFound)")
+	elif isinstance(error, commands.BotMissingPermissions):
+		await ctx.send("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur.")
+		print("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur.")
+	elif isinstance(error.original, discord.Forbidden):
+		await ctx.send("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur. (Forbidden)")
+		print("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur. (Forbidden)")
+	elif isinstance(error, commands.ConversionError):
+		await ctx.send("Une erreur est survenue durant la conversion, veuillez reessayer (ConversionError)")
+	elif isinstance(error, commands.BadArgument):
+		await ctx.send("Une erreur est survenue durant la conversion, veuillez reessayer (BadArgument)")
+	elif isinstance(error, commands.PrivateMessageOnly):
+		await ctx.send("Cette commande doit être effectuée en message privé (PrivateMessageOnly)")
+	elif isinstance(error, commands.MemberNotFound):
+		await ctx.send("L'utilisateur entré est introuvable... (MemberNotFound)")
+	elif isinstance(error, commands.MissingAnyRole):
+		await ctx.send(f"Il vous manque le role {missing_roles} pour effecter cette commande.")
 
+#Dynamic rich presence
 #async def update_presence():
 #	while True:
 #		await client.change_presence(activity=discord.Game(name="Site web : veaf.org"))
 #		await asyncio.sleep(10)
 #		await client.change_presence(activity=discord.Game(name="Teamspeak : ts.veaf.org"))
 #		await asyncio.sleep(10)
-#		await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &needhelp"))
+#		await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
 #		await asyncio.sleep(10)
 #		await client.change_presence(activity=discord.Game(name="Ce bot est le bot offciel de la VEAF"))
 #		await asyncio.sleep(10)
 #client.loop.create_task(update_presence())
 
 
-token = open("token.txt","r").readline() 
+token = open("token.txt","r").readline() #Put your token in this file (token.txt)
 client.run(token) #/!\ DO NOT SHARE YOUR TOKEN ! /!\
 
 print("\n\n\n VEAF Bot is shutting down... Bye bye !") #The bot is shutting down...
