@@ -42,7 +42,7 @@ client = commands.Bot(command_prefix = "&") #Changez le "&" pour changer le pré
 @client.event
 async def on_ready():
 	print('We have logged in as {0.user}'.format(client)) #Ce message est envoyé quand le bot est prêt à fonctionné
-	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &needhelp"))
+	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
 
 
 @client.command()
@@ -86,7 +86,7 @@ async def aide(ctx):
 	embed = discord.Embed(title=f"Documentation du bot :", description=f"Voici la liste des information importante :", color = 0xFF00FF)
 	embed.add_field(name = "Préfix : &", value = "Le préfix est a utliliser a chaque début de commmande\n ``Exemple : &commande``", inline=False)
 	embed.add_field(name = "Commande act", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\"\n ``Utilisation : &act``", inline=True)
-	embed.add_field(name = "Commande needhelp", value = "Cette commande permet d'afficher ce que vous êtes entrain de lire !\n ``Utilisation : &aide``", inline=True)
+	embed.add_field(name = "Commande aide", value = "Cette commande permet d'afficher ce que vous êtes entrain de lire !\n ``Utilisation : &aide``", inline=True)
 	embed.add_field(name = "Commande clear", value = "Cette commande permet de supprimer les derniers messages envoyés dans le salon ou elle est exectué\n ``Utilisation : &clear [number]``", inline=True)
 	embed.add_field(name = "Commande Serverinfo", value = "Cette commande permet d'afficher des informations sur le serveur\n ``Utilisation : &serverinfo``", inline=True)
 	embed.add_field(name = "Commande où effetuer les commandes ?", value = "Vous devez effectuer les commandes de le salon ``:Salon Prévu a cette effet:``", inline=False)
