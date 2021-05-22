@@ -1,12 +1,13 @@
 #coding:utf-8
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
-#Last modified the 21/05/2021 @ 19:55
-#Version Alpha 0.2b
+#Last modified the 22/05/2021 @ 00:33
+#Version Alpha 0.3
 
 import random
 import os
 import time
+import pickle
 import discord
 import asyncio
 from discord.ext import commands
@@ -41,7 +42,7 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 
 
 
-print("Welcome ! (Current version is Alpha 0.2)") #Current version
+print("Welcome ! (Current version is Alpha 0.3)") #Current version
 print(time.strftime("Démarrage le %d/%m/%Y à %H:%I:%S, %Z"))
 
 
@@ -53,8 +54,16 @@ async def on_ready():
 	print('We have logged in as {0.user}'.format(client)) #This message is shown on the console when the bot is ready
 	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
 
+
+CommandChannel = ""
+
+with open('Data/CommandChannel.bin', 'rb') as datafile:
+	get_data = pickle.Unpickler(datafile)
+	CommandChannel = get_data.load() 
+	CommandChannel = int(''.join(map(str, CommandChannel)))
+
 def wrong_channel(ctx):
-	return ctx.message.channel.id == 845299225742540820
+	return ctx.message.channel.id == CommandChannel
 
 
 @client.command()
@@ -66,7 +75,11 @@ async def act(ctx, *, descInput ="Rien"):
 	'''
 	The command &act is a commande to create an activity
 	'''
-	channel = client.get_channel(845299069882728500)
+	with open('Data/ReadyRoomChannel.bin', 'rb') as datafile:
+		get_data = pickle.Unpickler(datafile)
+		ReadyRoomChannel = get_data.load() 
+	res = int(''.join(map(str, ReadyRoomChannel)))
+	channel = client.get_channel(res)
 	auteur = (ctx.author.name)
 	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
 	await ctx.send("Quel est votre activité (Description, Timeout is 2000 seconds)")
@@ -104,7 +117,11 @@ async def acti(ctx, *descInput):
 	'''
 
 	content = " ".join(descInput)
-	channel = client.get_channel(845299069882728500)
+	with open('Data/ReadyRoomChannel.bin', 'rb') as datafile:
+		get_data = pickle.Unpickler(datafile)
+		ReadyRoomChannel = get_data.load() 
+	res = int(''.join(map(str, ReadyRoomChannel)))
+	channel = client.get_channel(res)
 	auteur = (ctx.author.name)
 	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
 	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{content}\n\nRépondez avec la réaction \"✅\" si cette activité vous intéresse", color=0xDCAB00)
@@ -135,7 +152,8 @@ async def aide(ctx):
 	embed.add_field(name = "Commande aide", value = "Cette commande permet d'afficher ce que vous êtes entrain de lire !\n ``Utilisation : &aide``", inline=True)
 	embed.add_field(name = "Commande say", value = "Cette commande permet de me faire dire ce que vous voulez\n ``Utilisation : &say [message]``", inline=True)
 	embed.add_field(name = "Commande clear", value = "Cette commande permet de supprimer les derniers messages envoyés dans le salon ou elle est exectué\n ``Utilisation : &clear [number]``", inline=True)
-	embed.add_field(name = "Commande Serverinfo", value = "Cette commande permet d'afficher des informations sur le serveur\n ``Utilisation : &serverinfo``", inline=True)
+	embed.add_field(name = "Commande serverinfo", value = "Cette commande permet d'afficher des informations sur le serveur\n ``Utilisation : &serverinfo``", inline=True)
+	embed.add_field(name = "Commande settings", value = "Cette commande permet de modifier des informations pour le bot\n ``Utilisation : &settings help``", inline=True)
 	embed.add_field(name = "Commande où effetuer les commandes ?", value = "Vous devez effectuer les commandes de le salon ``:Salon Prévu a cette effet:``", inline=False)
 	embed.set_footer(text = random.choice(liste))
 	embed.set_thumbnail(url = "https://bit.ly/3oyArah")
@@ -159,20 +177,20 @@ async def clear(ctx, number : int):
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def serverinfo(ctx):
 	embed = discord.Embed(title = "Informations sur le serveur", color = 0xFFFFFE)
-	embed.add_field(name = "Nom du serveur :", value=ctx.guild)
-	embed.add_field(name = "Nombre de membres :", value=ctx.guild.member_count)
-	embed.add_field(name = "Nombre de salon textuels :", value= len(ctx.guild.text_channels), inline = False)
-	embed.add_field(name = "Nombre de salon vocaux :", value= len(ctx.guild.voice_channels), inline = True)
-	embed.add_field(name = "Propriétaire :", value=ctx.guild.owner, inline = False)
-	embed.add_field(name = "Nombre de rôle :", value= len(ctx.guild.roles), inline = True)
-	embed.add_field(name = "Salon du règlement :", value=ctx.guild.rules_channel, inline = True)
-	embed.add_field(name = "Niveau de vérification :", value= ctx.guild.verification_level, inline = True)
+	embed.add_field(name = "Nom du serveur :", value= f"```{ctx.guild}```")
+	embed.add_field(name = "Nombre de membres :", value= f"```{ctx.guild.member_count}```")
+	embed.add_field(name = "Nombre de salon textuels :", value= f"```{len(ctx.guild.text_channels)}```", inline = False)
+	embed.add_field(name = "Nombre de salon vocaux :", value= f"```{len(ctx.guild.voice_channels)}```", inline = True)
+	embed.add_field(name = "Propriétaire :", value=f"```{ctx.guild.owner}```", inline = False)
+	embed.add_field(name = "Nombre de rôle :", value= f"```{len(ctx.guild.roles)}```", inline = True)
+	embed.add_field(name = "Salon du règlement :", value=f"```{ctx.guild.rules_channel}```", inline = True)
+	embed.add_field(name = "Niveau de vérification :", value= f"```{ctx.guild.verification_level}```", inline = True)
 #	embed.add_field(name = "Description :", value= ctx.guild.description, inline = True)
-	embed.add_field(name = "Région du serveur :", value= ctx.guild.region, inline = True)
-	embed.add_field(name = "Niveau de boost :", value = ctx.guild.premium_tier, inline = False)
-	embed.add_field(name = "Serveur créer le :", value = ctx.guild.created_at, inline = False)
+	embed.add_field(name = "Région du serveur :", value= f"```{ctx.guild.region}```", inline = True)
+	embed.add_field(name = "Niveau de boost :", value = f"```{ctx.guild.premium_tier}```", inline = True)
+	embed.add_field(name = "Serveur créer le :", value = f"```{ctx.guild.created_at}```", inline = False)
 	embed.set_footer(text = random.choice(liste))
-	embed.set_thumbnail(url = ctx.guild.icon_url)
+#	embed.set_thumbnail(url = ctx.guild.icon_url)
 	await ctx.send(embed = embed)
 
 
@@ -183,34 +201,43 @@ async def say(ctx, *, msg=""):
 	await ctx.send(msg)
 
 
-#Settings Command (To Do)
-#ReadyRoomChannel = ""
-#
-#with open('Data/ReadyRoomChannel.txt', 'r') as datafile:
-#	ReadyRoomChannel = datafile.read()
-#
-#CommandChannel = ""
-#
-#with open('Data/CommandChannel.txt', 'r') as datafile:
-#	CommandChannel = datafile.read()
-#
-#
-#
-#@client.command()
-#async def settings(ctx, setting, *arg):
-#	global ReadyRoomChannel
-#	global CommandChannel
-#	if setting == "ReadyRoomChannel":
-#		ReadyRoomChannel = arg
-#		with open('Data/ReadyRoomChannel.txt', 'w') as datafile:
-#			datafile.write(str(ReadyRoomChannel))
-#	if setting == "CommandChannel":
-#		CommandChannel = arg
-#		with open('Data/CommandChannel.txt', 'w') as datafile:
-#			datafile.write(str(CommandChannel))
-#	print(ReadyRoomChannel)
-#	print(CommandChannel)
-#	return ReadyRoomChannel and CommandChannel
+#Settings Command
+
+
+
+
+
+@client.command()
+@commands.has_permissions(manage_guild = True)
+async def settings(ctx, setting, *arg):
+	global ReadyRoomChannel
+	global CommandChannel
+	if setting == "ReadyRoomChannel":
+		ReadyRoomChannel = arg
+		with open('Data/ReadyRoomChannel.bin', 'wb') as datafile:
+			ReadyRoomChannel = pickle.Pickler(datafile)
+			ReadyRoomChannel.dump(arg)
+		await ctx.send(f"L'option ReadyRoomChannel a bien été changé pour {arg}")
+	if setting == "CommandChannel":
+		CommandChannel = arg
+		with open('Data/CommandChannel.bin', 'wb') as datafile:
+			CommandChannel = pickle.Pickler(datafile)
+			CommandChannel.dump(arg)
+		await ctx.send(f"L'option CommandChannel a bien été changé pour {arg}")
+		with open('Data/CommandChannel.bin', 'rb') as datafile:
+			get_data = pickle.Unpickler(datafile)
+			CommandChannel = get_data.load() 
+			CommandChannel = int(''.join(map(str, CommandChannel)))
+	if setting == "help":
+		print("show list is sending")
+		embed = discord.Embed(title = "Listes des paramètres disponibles :", color = 0x666666)
+		embed.add_field(name = "Comment utiliser la commande &settings ?", value = "```&settings <setting> <arg>\n```", inline = False)
+		embed.add_field(name = "ReadyRoomChannel", value = "```Modifier le salon utilisé entant que \"ReadyRoom\"\n```", inline = False)
+		embed.add_field(name = "CommandChannel", value = "```Modifier le salon utilisé entant que salon de commande\n```", inline = False)
+		await ctx.send(embed = embed)
+		print("show list sended")
+	#print(CommandChannel)
+	#return ReadyRoomChannel and CommandChannel
 
 
 
