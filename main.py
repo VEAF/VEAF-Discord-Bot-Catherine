@@ -1,8 +1,8 @@
 #coding:utf-8
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
-#Last modified the 22/05/2021 @ 14:09
-#Version Alpha 0.3b
+#Last modified the 22/05/2021 @ 15:05
+#Version Alpha 0.4
 
 import random
 import os
@@ -42,7 +42,7 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 
 intents = discord.Intents().all()
 
-print("Welcome ! (Current version is Alpha 0.3b)") #Current version
+print("Welcome ! (Current version is Alpha 0.4)") #Current version
 print(time.strftime("Démarrage le %d/%m/%Y à %H:%I:%S, %Z"))
 
 
@@ -238,6 +238,24 @@ async def serverinfo(ctx):
 	await ctx.send(embed = embed)
 
 
+@client.command()
+@commands.has_permissions(manage_guild = True)
+@commands.cooldown(1, 10, commands.BucketType.user)
+async def userinfo(ctx, *, user: discord.Member = None):
+	date_format = "%a, %d %b %Y %I:%M %p"
+	embed = discord.Embed(title = f"Information sur {user.name}")
+	embed.set_thumbnail(url=user.avatar_url)
+	embed.add_field(name="Id de l'utilisateur :", value=f"```{user.id}```", inline = False)
+	embed.add_field(name="Bot :", value=f"```{user.bot}```", inline = True)
+	embed.add_field(name="Nickname :", value=f"```{user.display_name}```", inline = True)
+	embed.add_field(name="Username :", value=f"```{user.name}```", inline = True)
+	embed.add_field(name="Rendu de couleur :", value=f"```{user.color}```", inline = False)
+	embed.add_field(name="À Rejoint le :", value=f"```{user.joined_at.strftime(date_format)}```", inline = True)
+	embed.add_field(name="Compte Créé le :", value=f"```{user.created_at.strftime(date_format)}```", inline = True)
+	perm_string = ', '.join([str(p[0]).replace("_", " ").title() for p in user.guild_permissions if p[1]])
+	embed.add_field(name="Permissions :", value=perm_string, inline=False)
+	await ctx.send(embed = embed)
+
 #Send the message you want
 @client.command()
 @commands.cooldown(1, 3, commands.BucketType.user)
@@ -334,6 +352,8 @@ async def on_command_error(ctx, error):
 		await ctx.send("L'utilisateur entré est introuvable... (MemberNotFound)")
 	elif isinstance(error, commands.MissingAnyRole):
 		await ctx.send(f"Il vous manque le role {missing_roles} pour effecter cette commande.")
+	elif isinstance(error, discord.DMChannel):
+		await ctx.send(f"La commande doit être exectué dans un serveur (DMChannel)")
 
 #Dynamic rich presence
 #async def update_presence():
