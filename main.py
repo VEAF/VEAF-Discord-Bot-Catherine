@@ -1,8 +1,8 @@
 #coding:utf-8
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
-#Last modified the 22/05/2021 @ 00:33
-#Version Alpha 0.3
+#Last modified the 22/05/2021 @ 14:09
+#Version Alpha 0.3b
 
 import random
 import os
@@ -40,22 +40,66 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 "Le A10 était initialement nommé le YA-10A",
 "La premier atmosphérique normal est de 1013 hpa",]
 
+intents = discord.Intents().all()
 
-
-print("Welcome ! (Current version is Alpha 0.3)") #Current version
+print("Welcome ! (Current version is Alpha 0.3b)") #Current version
 print(time.strftime("Démarrage le %d/%m/%Y à %H:%I:%S, %Z"))
 
 
-client = commands.Bot(command_prefix = "&") #Change the "&" to change the bot's prefix
+client = commands.Bot(command_prefix = "&", intents=intents) #Change the "&" to change the bot's prefix
 
 
 @client.event
 async def on_ready():
 	print('We have logged in as {0.user}'.format(client)) #This message is shown on the console when the bot is ready
-	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
+	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide")) #Enable RichPresence
 
 
-CommandChannel = ""
+JoinMessageChannel = "" #Declare JoinMessageChannel
+
+with open('Data/JoinMessageChannel.bin', 'rb') as datafile:
+	get_data = pickle.Unpickler(datafile)
+	JoinMessageChannel = get_data.load() 
+	JoinMessageChannel = int(''.join(map(str, JoinMessageChannel)))
+
+LeaveMessageChannel = "" #Declare LeaveMessageChannel
+
+with open('Data/LeaveMessageChannel.bin', 'rb') as datafile:
+	get_data = pickle.Unpickler(datafile)
+	LeaveMessageChannel = get_data.load() 
+	LeaveMessageChannel = int(''.join(map(str, LeaveMessageChannel)))
+
+
+#Message when a user join the guild
+@client.event
+async def on_member_join(member):
+	embed = discord.Embed(title=f"**Bienvnenue à {member.mention}**", description=f"Bienvenue sur le Discord de la veaf !", color=0xDCAB00)
+	JoinMessageChannel.send(embed = embed)
+
+#Message when a user leave the guild
+@client.event
+async def on_member_remove(member):
+	embed = discord.Embed(title=f"**Au revoir à {member.name}**", description=f"À la prochaine, à plus !", color=0xDCAB00)
+	LeaveMessageChannel.send(embed = embed)
+
+#Message when a user got banned from the guild
+@client.event
+async def on_member_ban(user):
+	embed = discord.Embed(title=f"**⛔ {user.name} a été banni(e) ⛔!**", description=f"À la prochaine, à plus !", color=0xDCAB00)
+	LeaveMessageChannel.send(embed = embed)
+
+#Message when the bot got removed from a server
+@client.event
+async def on_guild_remove(guild):
+	print(f"Le bot a été retiré du serveur suivant : {guild}")
+
+#Message when the bot got added to a server
+@client.event
+async def on_guild_join(guild):
+	print(f"Le bot a été ajouté au serveur suivant : {guild}")
+
+
+CommandChannel = "" #Declare CommandChannel
 
 with open('Data/CommandChannel.bin', 'rb') as datafile:
 	get_data = pickle.Unpickler(datafile)
@@ -203,15 +247,13 @@ async def say(ctx, *, msg=""):
 
 #Settings Command
 
-
-
-
-
 @client.command()
 @commands.has_permissions(manage_guild = True)
 async def settings(ctx, setting, *arg):
 	global ReadyRoomChannel
 	global CommandChannel
+	global JoinMessageChannel
+	global LeaveMessageChannel
 	if setting == "ReadyRoomChannel":
 		ReadyRoomChannel = arg
 		with open('Data/ReadyRoomChannel.bin', 'wb') as datafile:
@@ -228,14 +270,34 @@ async def settings(ctx, setting, *arg):
 			get_data = pickle.Unpickler(datafile)
 			CommandChannel = get_data.load() 
 			CommandChannel = int(''.join(map(str, CommandChannel)))
+	if setting == "JoinMessageChannel":
+		JoinMessageChannel = arg
+		with open('Data/JoinMessageChannel.bin', 'wb') as datafile:
+			JoinMessageChannel = pickle.Pickler(datafile)
+			JoinMessageChannel.dump(arg)
+		await ctx.send(f"L'option JoinMessageChannel a bien été changé pour {arg}")
+		with open('Data/JoinMessageChannel.bin', 'rb') as datafile:
+			get_data = pickle.Unpickler(datafile)
+			JoinMessageChannel = get_data.load() 
+			JoinMessageChannel = int(''.join(map(str, JoinMessageChannel)))
+	if setting == "LeaveMessageChannel":
+		JoinMessageChannel = arg
+		with open('Data/LeaveMessageChannel.bin', 'wb') as datafile:
+			LeaveMessageChannel = pickle.Pickler(datafile)
+			LeaveMessageChannel.dump(arg)
+		await ctx.send(f"L'option LeaveMessageChannel a bien été changé pour {arg}")
+		with open('Data/LeaveMessageChannel.bin', 'rb') as datafile:
+			get_data = pickle.Unpickler(datafile)
+			LeaveMessageChannel = get_data.load() 
+			LeaveMessageChannel = int(''.join(map(str, LeaveMessageChannel)))
 	if setting == "help":
-		print("show list is sending")
 		embed = discord.Embed(title = "Listes des paramètres disponibles :", color = 0x666666)
 		embed.add_field(name = "Comment utiliser la commande &settings ?", value = "```&settings <setting> <arg>\n```", inline = False)
 		embed.add_field(name = "ReadyRoomChannel", value = "```Modifier le salon utilisé entant que \"ReadyRoom\"\n```", inline = False)
 		embed.add_field(name = "CommandChannel", value = "```Modifier le salon utilisé entant que salon de commande\n```", inline = False)
+		embed.add_field(name = "JoinMessageChannel", value = "```Modifier le salon utilisé entant que salon de bienvenue\n```", inline = False)
+		embed.add_field(name = "LeaveMessageChannel", value = "```Modifier le salon utilisé entant que salon d'adieu\n```", inline = False)
 		await ctx.send(embed = embed)
-		print("show list sended")
 	#print(CommandChannel)
 	#return ReadyRoomChannel and CommandChannel
 
