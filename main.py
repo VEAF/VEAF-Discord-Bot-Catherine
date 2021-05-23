@@ -1,8 +1,8 @@
 #coding:utf-8
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
-#Last modified the 22/05/2021 @ 15:05
-#Version Alpha 0.4
+#Last modified the 23/05/2021 @ 20:32
+#Version Alpha 0.5.0
 
 import random
 import os
@@ -38,7 +38,18 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 "Le canon du F14 a un canon M61A1 Vulcan de 20 mm",
 "Le F-14AM est une version améliorer du F14 effectuée par l'Iran, il est équipé de nouveaux missiles Fakour 90",
 "Le A10 était initialement nommé le YA-10A",
-"La premier atmosphérique normal est de 1013 hpa",]
+"La premier atmosphérique normal est de 1013 hpa",
+"Wayne Allwine (la voix de Mickey Mouse) et Russi Taylor (la voix de Minnie Mouse) étaient mariés dans la vraie vie",
+"Quelque part dans le monde en ce moment, quelqu'un est en train de pousser une porte sur laquelle il y a écrit 'tirez'",
+"Les loutres ont une petite poche dans leur peau pour y mettre leurs cailloux préférés, qu'elle utilise comme outils",
+"Les marées dans les régions de Bretagne et de Normandie sont les plus fortes en Europe, avec une différence de niveau allant jusqu'à 15 mètres entre la marée basse et la marée haute.",
+"KLM est la plus vieille compagnie aérienne, créé en 1919",
+"En 1987, un compagnie aérienne Américaine a économisé $40,000 en retirant une olive de chaque salade servie en première classe",
+"Un avion décolle ou se pose toues les 37 secondes au 'Chicago O’Hare’s International Airport'",
+"Des compagnie aérienne Américaine on changé les manuelles papier des pilotes en IPad, ils ont économisé $1.2 million en fuel",
+"Le pilote and et le co-pilote doivent manger de la nourritures différent en cas d'empoisoment alimentaire",
+"Le vol de Sydney à Dallas en Qantas A380 est le vol le plus long en distance du monde",
+"À l'heure ou j'écris ceci, le bot fait 391 lignes"]
 
 intents = discord.Intents().all()
 
@@ -73,20 +84,23 @@ with open('Data/LeaveMessageChannel.bin', 'rb') as datafile:
 #Message when a user join the guild
 @client.event
 async def on_member_join(member):
-	embed = discord.Embed(title=f"**Bienvnenue à {member.mention}**", description=f"Bienvenue sur le Discord de la veaf !", color=0xDCAB00)
-	JoinMessageChannel.send(embed = embed)
+	channel = client.get_channel(JoinMessageChannel)
+	embed = discord.Embed(title=f"**Bienvnenue à {member.name}**", description=f"Bienvenue sur le Discord de la veaf !", color=0xDCAB00)
+	await channel.send(embed = embed)
 
 #Message when a user leave the guild
 @client.event
 async def on_member_remove(member):
+	channel = client.get_channel(LeaveMessageChannel)
 	embed = discord.Embed(title=f"**Au revoir à {member.name}**", description=f"À la prochaine, à plus !", color=0xDCAB00)
-	LeaveMessageChannel.send(embed = embed)
+	await channel.send(embed = embed)
 
 #Message when a user got banned from the guild
 @client.event
 async def on_member_ban(user):
+	channel = client.get_channel(LeaveMessageChannel)
 	embed = discord.Embed(title=f"**⛔ {user.name} a été banni(e) ⛔!**", description=f"À la prochaine, à plus !", color=0xDCAB00)
-	LeaveMessageChannel.send(embed = embed)
+	await channel.send(embed = embed)
 
 #Message when the bot got removed from a server
 @client.event
