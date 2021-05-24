@@ -1,8 +1,8 @@
 #coding:utf-8
 #By Mikcael.exe#8186 
 #Created the 20/05/2021 @ 19:16
-#Last modified the 23/05/2021 @ 20:32
-#Version Alpha 0.5.0
+#Last modified the 24/05/2021 @ 15:23
+#Version Alpha 0.6.0
 
 import random
 import os
@@ -53,7 +53,7 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 
 intents = discord.Intents().all()
 
-print("Welcome ! (Current version is Alpha 0.4)") #Current version
+print("Welcome ! (Current version is Alpha 0.6.0)") #Current version
 print(time.strftime("Démarrage le %d/%m/%Y à %H:%I:%S, %Z"))
 
 
@@ -62,8 +62,9 @@ client = commands.Bot(command_prefix = "&", intents=intents) #Change the "&" to 
 
 @client.event
 async def on_ready():
-	print('We have logged in as {0.user}'.format(client)) #This message is shown on the console when the bot is ready
-	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide")) #Enable RichPresence
+	print('Enregistrer avec succès entant que {0.user}'.format(client)) #This message is shown on the console when the bot is ready
+#	await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide")) #Enable static RichPresence
+	client.loop.create_task(update_presence()) #Enable dynamic RichPresence
 
 
 JoinMessageChannel = "" #Declare JoinMessageChannel
@@ -84,22 +85,25 @@ with open('Data/LeaveMessageChannel.bin', 'rb') as datafile:
 #Message when a user join the guild
 @client.event
 async def on_member_join(member):
+	hashtag = str(member.discriminator)
 	channel = client.get_channel(JoinMessageChannel)
-	embed = discord.Embed(title=f"**Bienvnenue à {member.name}**", description=f"Bienvenue sur le Discord de la veaf !", color=0xDCAB00)
+	embed = discord.Embed(title=f"**<:signaddicon:846112478400217109> Bienvnenue à {member.name}#{hashtag}**", color=0x13DD1A)
 	await channel.send(embed = embed)
 
 #Message when a user leave the guild
 @client.event
 async def on_member_remove(member):
+	hashtag = str(member.discriminator)
 	channel = client.get_channel(LeaveMessageChannel)
-	embed = discord.Embed(title=f"**Au revoir à {member.name}**", description=f"À la prochaine, à plus !", color=0xDCAB00)
+	embed = discord.Embed(title=f"**<:signdeleteicon:846112478173986857> Au revoir à {member.name}#{hashtag}**", color=0xFF0000)
 	await channel.send(embed = embed)
 
 #Message when a user got banned from the guild
 @client.event
-async def on_member_ban(user):
+async def on_member_ban(user, reason):
+	hashtag = str(user.discriminator)
 	channel = client.get_channel(LeaveMessageChannel)
-	embed = discord.Embed(title=f"**⛔ {user.name} a été banni(e) ⛔!**", description=f"À la prochaine, à plus !", color=0xDCAB00)
+	embed = discord.Embed(title=f"**<:auctionhammericon:846112478400217108>  {user.name}#{hashtag} a été banni(e) pour : {reason} <:auctionhammericon:846112478400217108>!**", color=0x7A0000)
 	await channel.send(embed = embed)
 
 #Message when the bot got removed from a server
@@ -123,10 +127,15 @@ with open('Data/CommandChannel.bin', 'rb') as datafile:
 def wrong_channel(ctx):
 	return ctx.message.channel.id == CommandChannel
 
+def check(author):
+	def inner_check(message): 
+		if message.author != author:
+			return False
+		return inner_check
 
 @client.command()
-@commands.has_permissions(send_messages = True)
-@commands.check(wrong_channel)
+#@commands.has_permissions(send_messages = True)
+#@commands.check(wrong_channel)
 #@commands.has_any_role('Cadet', "Membres VEAF")
 @commands.cooldown(1, 100, commands.BucketType.user)
 async def act(ctx, *, descInput ="Rien"): 
@@ -139,28 +148,36 @@ async def act(ctx, *, descInput ="Rien"):
 	res = int(''.join(map(str, ReadyRoomChannel)))
 	channel = client.get_channel(res)
 	auteur = (ctx.author.name)
-	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
-	await ctx.send("Quel est votre activité (Description, Timeout is 2000 seconds)")
-	descInput = await client.wait_for("message", timeout = 2000)
-
-	await ctx.send("Quel est la date de votre activité ``(Format : Jour/Mois)`` ? ``(Timeout is 30 seconds)``")
-	dateInput = await client.wait_for("message", timeout = 30)
-
-	await ctx.send("A quel heure commence votre activité ``(Format : HH:MM)`` ? ``(Timeout is 30 seconds)``")
-	heureDebutInput = await client.wait_for("message", timeout = 30)
-
-	await ctx.send("A quel heure se termine votre activité ``(Format : HH:MM)`` ? (Timeout is 30 seconds)``")
-	heureFinInput = await client.wait_for("message", timeout = 30)
-
-	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{descInput.content}\n\nRépondez avec la réaction \"✅\" si cette activité vous intéresse", color=0xDCAB00)
+	hashtag = str(ctx.author.discriminator)
+	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur}#{hashtag} ({ctx.author.id})...")
+	try:	
+		embed = discord.Embed(description=f"1 - Quel est votre activité (Description, Timeout is 2000 seconds)")
+		msg = await ctx.send(embed = embed)
+		descInput = await client.wait_for("message", check=check(ctx.author), timeout = 2000)
+	
+		embed = discord.Embed(description=f"2 - Quel est la date de votre activité `(Format : Jour/Mois)` ? (Timeout is 30 seconds)")
+		await msg.edit(embed = embed)
+		dateInput = await client.wait_for("message", check=check(ctx.author), timeout = 30)
+	
+		embed = discord.Embed(description=f"3 - A quel heure commence votre activité `(Format : HH:MM)` ? (Timeout is 30 seconds)")
+		await msg.edit(embed = embed)
+		heureDebutInput = await client.wait_for("message", check=check(ctx.author), timeout = 30)
+	
+		embed = discord.Embed(description=f"4 - A quel heure se termine votre activité `(Format : HH:MM)` ? (Timeout is 30 seconds)")
+		await msg.edit(embed = embed)
+		heureFinInput = await client.wait_for("message", check=check(ctx.author), timeout = 30)
+	except asyncio.TimeoutError:
+		await ctx.send(f"Temps maximal dépassé, veuillez réeffetuer la commande (TimeoutError)")
+		return
+	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{descInput.content}\n\nRépondez avec la réaction \"<:signcheckicon:846110289388240947>\" si cette activité vous intéresse", color=0xDCAB00)
 #	embed.set_author(name="VEAF Bot")
 	embed.set_thumbnail(url = ctx.author.avatar_url)
 	embed.add_field(name = "Date", value = dateInput.content)
 	embed.add_field(name = "Heure", value = f"De {heureDebutInput.content} à {heureFinInput.content}")
 	embed.set_footer(text = random.choice(liste))
 	message = await channel.send(embed = embed)
-	await message.add_reaction("✅")
-	save = f"La commande \"&act\" à été exectué avec succès par {auteur} ({ctx.author.id}), contenu :\n Description : {descInput.content}\n Date et heure : {dateInput.content} de {heureDebutInput.content} à {heureFinInput.content}"
+	await message.add_reaction("<:signcheckicon:846110289388240947>")
+	save = f"La commande \"&act\" a été exectué avec succès par {auteur}#{auteur.discriminator} ({ctx.author.id}), contenu :\n Description : {descInput.content}\n Date et heure : {dateInput.content} de {heureDebutInput.content} à {heureFinInput.content}"
 	print(save)
 
 
@@ -182,14 +199,14 @@ async def acti(ctx, *descInput):
 	channel = client.get_channel(res)
 	auteur = (ctx.author.name)
 	print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
-	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{content}\n\nRépondez avec la réaction \"✅\" si cette activité vous intéresse", color=0xDCAB00)
+	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{content}\n\nRépondez avec la réaction \"<:signcheckicon:846110289388240947>\" si cette activité vous intéresse", color=0xDCAB00)
 #	embed.set_author(name="VEAF Bot")
 	embed.set_thumbnail(url = ctx.author.avatar_url)
 #	embed.add_field(name = "Date", value = dateInput.content)
 #	embed.add_field(name = "Heure", value = f"De {heureDebutInput.content} à {heureFinInput.content}")
 	embed.set_footer(text = random.choice(liste))
 	message = await channel.send(embed = embed)
-	await message.add_reaction("✅")
+	await message.add_reaction("<:signcheckicon:846110289388240947>")
 	embed = discord.Embed(title=f"La commande a été exectué avec succès par {auteur}")
 	ctx.send("La commande a étét exectué avec succès")
 	save = f"La commande \"&act\" a été exectué avec succès par {auteur} ({ctx.author.id}), contenu :\n Description : {content}"
@@ -200,7 +217,7 @@ async def acti(ctx, *descInput):
 #It's a basic &help command
 @client.command()
 @commands.has_permissions(send_messages = True)
-@commands.check(wrong_channel)
+#@commands.check(wrong_channel)
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def aide(ctx):
 	embed = discord.Embed(title=f"Documentation du bot :", description=f"Voici la liste des information importante :", color = 0xFF00FF)
@@ -236,18 +253,19 @@ async def clear(ctx, number : int):
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def serverinfo(ctx):
 	embed = discord.Embed(title = "Informations sur le serveur", color = 0xFFFFFE)
-	embed.add_field(name = "Nom du serveur :", value= f"```{ctx.guild}```")
-	embed.add_field(name = "Nombre de membres :", value= f"```{ctx.guild.member_count}```")
+	embed.add_field(name = "<:username:846107877798182923> Nom du serveur :", value= f"```{ctx.guild}```")
+	embed.add_field(name = "<:ide:846107878376210442> Id du serveur :", value= f"```{ctx.guild.id}```")
+	embed.add_field(name = "<:profilegroupicon:846109526398730260> Nombre de membres :", value= f"```{ctx.guild.member_count}```")
 	embed.add_field(name = "Nombre de salon textuels :", value= f"```{len(ctx.guild.text_channels)}```", inline = False)
 	embed.add_field(name = "Nombre de salon vocaux :", value= f"```{len(ctx.guild.voice_channels)}```", inline = True)
-	embed.add_field(name = "Propriétaire :", value=f"```{ctx.guild.owner}```", inline = False)
-	embed.add_field(name = "Nombre de rôle :", value= f"```{len(ctx.guild.roles)}```", inline = True)
-	embed.add_field(name = "Salon du règlement :", value=f"```{ctx.guild.rules_channel}```", inline = True)
-	embed.add_field(name = "Niveau de vérification :", value= f"```{ctx.guild.verification_level}```", inline = True)
+	embed.add_field(name = "<:paperclipicon:846110289233575967> Propriétaire :", value=f"```{ctx.guild.owner}```", inline = False)
+	embed.add_field(name = "<:profileicon:846110952315289611> Nombre de rôle :", value= f"```{len(ctx.guild.roles)}```", inline = True)
+	embed.add_field(name = "<:nickname:846107877646139464> Salon du règlement :", value=f"```{ctx.guild.rules_channel}```", inline = True)
+	embed.add_field(name = "<:tagicon:846107877646139463> Niveau de vérification :", value= f"```{ctx.guild.verification_level}```", inline = True)
 #	embed.add_field(name = "Description :", value= ctx.guild.description, inline = True)
-	embed.add_field(name = "Région du serveur :", value= f"```{ctx.guild.region}```", inline = True)
-	embed.add_field(name = "Niveau de boost :", value = f"```{ctx.guild.premium_tier}```", inline = True)
-	embed.add_field(name = "Serveur créer le :", value = f"```{ctx.guild.created_at}```", inline = False)
+	embed.add_field(name = "<:mapmarkericon:846110289203560448> Région du serveur :", value= f"```{ctx.guild.region}```", inline = True)
+	embed.add_field(name = "<:pinicon:846110288973004802> Niveau de boost :", value = f"```{ctx.guild.premium_tier}```", inline = True)
+	embed.add_field(name = "<:bot:846107878057967666> Serveur créer le :", value = f"```{ctx.guild.created_at}```", inline = False)
 	embed.set_footer(text = random.choice(liste))
 #	embed.set_thumbnail(url = ctx.guild.icon_url)
 	await ctx.send(embed = embed)
@@ -260,15 +278,15 @@ async def userinfo(ctx, *, user: discord.Member = None):
 	date_format = "%a, %d %b %Y %I:%M %p"
 	embed = discord.Embed(title = f"Information sur {user.name}")
 	embed.set_thumbnail(url=user.avatar_url)
-	embed.add_field(name="Id de l'utilisateur :", value=f"```{user.id}```", inline = False)
-	embed.add_field(name="Bot :", value=f"```{user.bot}```", inline = True)
-	embed.add_field(name="Nickname :", value=f"```{user.display_name}```", inline = True)
-	embed.add_field(name="Username :", value=f"```{user.name}```", inline = True)
-	embed.add_field(name="Rendu de couleur :", value=f"```{user.color}```", inline = False)
-	embed.add_field(name="À Rejoint le :", value=f"```{user.joined_at.strftime(date_format)}```", inline = True)
-	embed.add_field(name="Compte Créé le :", value=f"```{user.created_at.strftime(date_format)}```", inline = True)
+	embed.add_field(name="<:ide:846107878376210442> Id de l'utilisateur :", value=f"```{user.id}```", inline = False)
+	embed.add_field(name="<:bot:846107878057967666> Bot :", value=f"```{user.bot}```", inline = True)
+	embed.add_field(name="<:nickname:846107877646139464> Nickname :", value=f"```{user.display_name}```", inline = True)
+	embed.add_field(name="<:username:846107877798182923> Username :", value=f"```{user.name}```", inline = True)
+	embed.add_field(name="<:tagicon:846107877646139463> Rendu de couleur :", value=f"```{user.color}```", inline = False)
+	embed.add_field(name="<:paperplaneicon:846107877676154941> À Rejoint le :", value=f"```{user.joined_at.strftime(date_format)}```", inline = True)
+	embed.add_field(name="<:creationdate:846107877893996574> Compte Créé le :", value=f"```{user.created_at.strftime(date_format)}```", inline = True)
 	perm_string = ', '.join([str(p[0]).replace("_", " ").title() for p in user.guild_permissions if p[1]])
-	embed.add_field(name="Permissions :", value=perm_string, inline=False)
+	embed.add_field(name="<:keyicon:846107877382553651> Permissions :", value=perm_string, inline=False)
 	await ctx.send(embed = embed)
 
 #Send the message you want
@@ -371,17 +389,14 @@ async def on_command_error(ctx, error):
 		await ctx.send(f"La commande doit être exectué dans un serveur (DMChannel)")
 
 #Dynamic rich presence
-#async def update_presence():
-#	while True:
-#		await client.change_presence(activity=discord.Game(name="Site web : veaf.org"))
-#		await asyncio.sleep(10)
-#		await client.change_presence(activity=discord.Game(name="Teamspeak : ts.veaf.org"))
-#		await asyncio.sleep(10)
-#		await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
-#		await asyncio.sleep(10)
-#		await client.change_presence(activity=discord.Game(name="Ce bot est le bot offciel de la VEAF"))
-#		await asyncio.sleep(10)
-#client.loop.create_task(update_presence())
+async def update_presence():
+	while True:
+		await client.change_presence(activity=discord.Game(name="Site web : veaf.org"))
+		await asyncio.sleep(5)
+		await client.change_presence(activity=discord.Game(name="Besoin d'aide ? Faites &aide"))
+		await asyncio.sleep(30)
+		await client.change_presence(activity=discord.Game(name="Ce bot est le bot offciel de la VEAF"))
+		await asyncio.sleep(5)
 
 
 token = open("token.txt","r").readline() #Put your token in this file (token.txt)
