@@ -49,7 +49,8 @@ liste = ["1 + 1 = 2 (Ou 11 par fois)", #This variable is useless, but do not del
 "Des compagnie aérienne Américaine on changé les manuelles papier des pilotes en IPad, ils ont économisé $1.2 million en fuel",
 "Le pilote and et le co-pilote doivent manger de la nourritures différent en cas d'empoisoment alimentaire",
 "Le vol de Sydney à Dallas en Qantas A380 est le vol le plus long en distance du monde",
-"À l'heure ou j'écris ceci, le bot fait 391 lignes"]
+"À l'heure ou j'écris ceci, le bot fait 391 lignes",
+"0x68747470733a2f2f6269742e6c792f32515333574878"]
 
 intents = discord.Intents().all()
 
@@ -169,7 +170,7 @@ async def act(ctx, *, descInput ="Rien"):
 	except asyncio.TimeoutError:
 		await ctx.send(f"Temps maximal dépassé, veuillez réeffetuer la commande (TimeoutError)")
 		return
-	embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{descInput.content}\n\nRépondez avec la réaction \"<:signcheckicon:846110289388240947>\" si cette activité vous intéresse", color=0xDCAB00)
+	embed = discord.Embed(title=f"**Activité de {auteur}#{hashtag}**", description=f"{descInput.content}\n\nRépondez avec la réaction \"<:signcheckicon:846110289388240947>\" si cette activité vous intéresse", color=0xDCAB00)
 #	embed.set_author(name="VEAF Bot")
 	embed.set_thumbnail(url = ctx.author.avatar_url)
 	embed.add_field(name = "Date", value = dateInput.content)
@@ -177,7 +178,7 @@ async def act(ctx, *, descInput ="Rien"):
 	embed.set_footer(text = random.choice(liste))
 	message = await channel.send(embed = embed)
 	await message.add_reaction("<:signcheckicon:846110289388240947>")
-	save = f"La commande \"&act\" a été exectué avec succès par {auteur}#{auteur.discriminator} ({ctx.author.id}), contenu :\n Description : {descInput.content}\n Date et heure : {dateInput.content} de {heureDebutInput.content} à {heureFinInput.content}"
+	save = f"La commande \"&act\" a été exectué avec succès par {auteur}#{hashtag} ({ctx.author.id}), contenu :\n Description : {descInput.content}\n Date et heure : {dateInput.content} de {heureDebutInput.content} à {heureFinInput.content}"
 	print(save)
 
 
@@ -261,7 +262,7 @@ async def serverinfo(ctx):
 	embed.add_field(name = "<:paperclipicon:846110289233575967> Propriétaire :", value=f"```{ctx.guild.owner}```", inline = False)
 	embed.add_field(name = "<:profileicon:846110952315289611> Nombre de rôle :", value= f"```{len(ctx.guild.roles)}```", inline = True)
 	embed.add_field(name = "<:nickname:846107877646139464> Salon du règlement :", value=f"```{ctx.guild.rules_channel}```", inline = True)
-	embed.add_field(name = "<:tagicon:846107877646139463> Niveau de vérification :", value= f"```{ctx.guild.verification_level}```", inline = True)
+	embed.add_field(name = "<:shieldokicon:847082332041117716> Niveau de vérification :", value= f"```{ctx.guild.verification_level}```", inline = True)
 #	embed.add_field(name = "Description :", value= ctx.guild.description, inline = True)
 	embed.add_field(name = "<:mapmarkericon:846110289203560448> Région du serveur :", value= f"```{ctx.guild.region}```", inline = True)
 	embed.add_field(name = "<:pinicon:846110288973004802> Niveau de boost :", value = f"```{ctx.guild.premium_tier}```", inline = True)
@@ -274,7 +275,7 @@ async def serverinfo(ctx):
 @client.command()
 @commands.has_permissions(manage_guild = True)
 @commands.cooldown(1, 10, commands.BucketType.user)
-async def userinfo(ctx, *, user: discord.Member = None):
+async def userinfo(ctx, *, user: discord.Member):
 	date_format = "%a, %d %b %Y %I:%M %p"
 	embed = discord.Embed(title = f"Information sur {user.name}")
 	embed.set_thumbnail(url=user.avatar_url)
@@ -350,17 +351,35 @@ async def settings(ctx, setting, *arg):
 		embed.add_field(name = "LeaveMessageChannel", value = "```Modifier le salon utilisé entant que salon d'adieu\n```", inline = False)
 		await ctx.send(embed = embed)
 	#print(CommandChannel)
-	#return ReadyRoomChannel and CommandChannel
 
 
+@client.command()
+async def ping(ctx):
+    if round(client.latency * 1000) <= 50:
+        embed=discord.Embed(title="<:shieldokicon:847082332041117716> Ping bas ! <:shieldokicon:847082332041117716>", description=f":ping_pong: Pong! Le ping est de **{round(client.latency *1000)}** milliseconds!", color=0x44ff44)
+    elif round(client.latency * 1000) <= 100:
+        embed=discord.Embed(title="<:shieldwarningicon:847082331823144961> Ping moyen ! <:shieldwarningicon:847082331823144961>", description=f":ping_pong: Pong! Le ping est de **{round(client.latency *1000)}** milliseconds!", color=0xffd000)
+    elif round(client.latency * 1000) <= 200:
+        embed=discord.Embed(title="<:shieldwarningicon:847082331823144961> Ping haut ! <:shieldwarningicon:847082331823144961>", description=f":ping_pong: Pong! Le ping est de **{round(client.latency *1000)}** milliseconds!", color=0xff6600)
+    else:
+        embed=discord.Embed(title="<:shielderroricon:847082331365441537> Ping très haut ! <:shielderroricon:847082331365441537>", description=f":ping_pong: Pong! Le ping est de **{round(client.latency *1000)}** milliseconds!", color=0x990000)
+    await ctx.send(embed=embed)
+    print(f"Ping : {round(client.latency *1000)}ms")
 
+#@client.command()
+#async def ts3(ctx):
+#	img = "https://www.tsviewer.com/promotion/dynamic_sig/sig.php/clan468x120_all/1118184.png"
+#	#embed = discord.Embed(title = "Information sur le TeamSpeak")
+#	#embed.set_footer(text="Coucou", icon_url="https://www.tsviewer.com/promotion/dynamic_sig/sig.php/clan160x283_all/1118184.png")
+#	#await ctx.send(embed=embed)
+#	await ctx.send(img)
 
 #Error management
 @client.event
 async def on_command_error(ctx, error):
 	print(error)
 	if isinstance(error, commands.CommandOnCooldown):
-		await ctx.send(f"Cette commande est en cooldown, vous pourrez l'exectuter dans {round(error.retry_after, 1)} secondes (CommandOnCooldown)")
+		await ctx.send(f"⌛ Cette commande est en cooldown, vous pourrez l'exectuter dans {round(error.retry_after, 1)} secondes (CommandOnCooldown)")
 	elif isinstance(error, commands.MissingRequiredArgument):
 		await ctx.send("Au moins un argument est manquant (MissingRequiredArgument)")
 	elif isinstance(error, commands.MissingPermissions):
@@ -373,20 +392,20 @@ async def on_command_error(ctx, error):
 		await ctx.send("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur.")
 		print("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur.")
 	elif isinstance(error.original, discord.Forbidden):
-		await ctx.send("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur. (Forbidden)")
+		await ctx.send("<:shieldwarningicon:847082331823144961> On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur. (Forbidden)")
 		print("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur. (Forbidden)")
 	elif isinstance(error, commands.ConversionError):
-		await ctx.send("Une erreur est survenue durant la conversion, veuillez reessayer (ConversionError)")
+		await ctx.send("<:shieldwarningicon:847082331823144961> Une erreur est survenue durant la conversion, veuillez réessayer (ConversionError)")
 	elif isinstance(error, commands.BadArgument):
-		await ctx.send("Une erreur est survenue durant la conversion, veuillez reessayer (BadArgument)")
+		await ctx.send("Une erreur est survenue durant la conversion, veuillez réessayer (BadArgument)")
 	elif isinstance(error, commands.PrivateMessageOnly):
 		await ctx.send("Cette commande doit être effectuée en message privé (PrivateMessageOnly)")
 	elif isinstance(error, commands.MemberNotFound):
-		await ctx.send("L'utilisateur entré est introuvable... (MemberNotFound)")
+		await ctx.send("<:username:846107877798182923> L'utilisateur entré est introuvable... (MemberNotFound)")
 	elif isinstance(error, commands.MissingAnyRole):
-		await ctx.send(f"Il vous manque le role {missing_roles} pour effecter cette commande.")
+		await ctx.send(f"<:shielderroricon:847082331365441537> Il vous manque le role {missing_roles} pour effecter cette commande.")
 	elif isinstance(error, discord.DMChannel):
-		await ctx.send(f"La commande doit être exectué dans un serveur (DMChannel)")
+		await ctx.send(f"<:mapmarkericon:846110289203560448> La commande doit être exectué dans un serveur (DMChannel)")
 
 #Dynamic rich presence
 async def update_presence():
