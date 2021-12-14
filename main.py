@@ -1,8 +1,31 @@
 #coding:utf-8
-#By Mikcael.exe#8186 
-#Created the 20/05/2021 @ 19:16
-#Last modified the 24/05/2021 @ 15:23
-#Version Alpha 0.6.0
+
+####################################
+#       By Mikcael.exe#8186        #
+# Creation date 20/05/2021 @ 19:16 #
+#      Version Release 1.1.0       #
+###############################################################################################################
+#       _..._                                                                                                 #
+#    .-'_..._''.                                                                                              #
+#  .' .'      '.\                    .              __.....__             .--.   _..._         __.....__      #
+# / .'                             .'|          .-''         '.           |__| .'     '.   .-''         '.    #
+#. '                           .| <  |         /     .-''"'-.  `. .-,.--. .--..   .-.   . /     .-''"'-.  `.  #
+#| |                 __      .' |_ | |        /     /________\   \|  .-. ||  ||  '   '  |/     /________\   \ #
+#| |              .:--.'.  .'     || | .'''-. |                  || |  | ||  ||  |   |  ||                  | #
+#. '             / |   \ |'--.  .-'| |/.'''. \\    .-------------'| |  | ||  ||  |   |  |\    .-------------' #
+# \ '.          .`" __ | |   |  |  |  /    | | \    '-.____...---.| |  '- |  ||  |   |  | \    '-.____...---. #
+#  '. `._____.-'/ .'.''| |   |  |  | |     | |  `.             .' | |     |__||  |   |  |  `.             .'  #
+#    `-.______ / / /   | |_  |  '.'| |     | |    `''-...... -'   | |         |  |   |  |    `''-...... -'    #
+#             `  \ \._,\ '/  |   / | '.    | '.                   |_|         |  |   |  |                     #
+#                 `--'  `"   `'-'  '---'   '---'                              '--'   '--'                     #
+#  _____  _                       _   ____        _                                                           #
+# |  __ \(_)                     | | |  _ \      | |                                                          #
+# | |  | |_ ___  ___ ___  _ __ __| | | |_) | ___ | |_                                                         #
+# | |  | | / __|/ __/ _ \| '__/ _` | |  _ < / _ \| __|                                                        #
+# | |__| | \__ \ (_| (_) | | | (_| | | |_) | (_) | |_                                                         #
+# |_____/|_|___/\___\___/|_|  \__,_| |____/ \___/ \__|                                                        #
+###############################################################################################################
+
 
 import random
 import os
@@ -13,6 +36,7 @@ import asyncio
 import json
 import markdown
 import logging
+import datetime
 from discord.ext import commands
 from discord.ext import tasks
 
@@ -27,7 +51,7 @@ liste = [] #J'espère pouvoir te rerajouter un jour <3
 
 intents = discord.Intents().all()
 
-print("Welcome ! (Current version is Alpha 0.6.0)") #Current version
+print("Welcome ! (Current version is Release 1.1.0)") #Current version
 print(time.strftime("Démarrage le %d/%m/%Y à %H:%I:%S, %Z"))
 
 with open('data.json') as i: #Load json parameters
@@ -63,17 +87,23 @@ LeaveMessageChannel = data["LeaveMessageChannel"] #Declare LeaveMessageChannel
 #	LeaveMessageChannel = get_data.load() 
 #	LeaveMessageChannel = int(''.join(map(str, LeaveMessageChannel)))
 
+ReadyRoomChannel = data["ReadyRoomChannel"] #Declare ReadyRoomChannel
+
+AutoPurgeTimer = int(data["AutoPurgeTimer"]) #Declare AutoPurgeTimer
+AutoPurgeOn = 0
 
 #Message when a user join the guild
 @client.event
 async def on_member_join(member):
 	hashtag = str(member.discriminator)
 	channel = client.get_channel(JoinMessageChannel)
+	wembed = discord.Embed(title=f"**<:signaddicon:846112478400217109> Bienvenenue à {member.name}#{hashtag}**", color=0x13DD1A)
 	embed = discord.Embed(title=f"**<:signaddicon:846112478400217109> Bienvenenue à la VEAF !**", description=wc_message, color=0x13DD1A)
 	embed.add_field(name = "Site web", value = "[veaf.org](https://www.veaf.org)")
 	embed.add_field(name = "Forum :", value = "[community.veaf.org](https://community.veaf.org)")
 	embed.add_field(name = "Teamspeak :", value ="[Connection automatique](https://tinyurl.com/veafautoconnect)")
 	await member.send(embed = embed)
+	await channel.send(embed = wembed)
 
 #Message when a user leave the guild
 @client.event
@@ -109,7 +139,7 @@ CommandChannel = data["CommandChannel"] #Declare CommandChannel
 #	CommandChannel = int(''.join(map(str, CommandChannel)))
 
 def wrong_channel(ctx):
-	return ctx.message.channel.id == CommandChannel
+	return ctx.message.channel.id == int(CommandChannel)
 
 def check(author):
 	def inner_check(message): 
@@ -168,7 +198,7 @@ def check(author):
 @client.command()
 @commands.has_permissions(send_messages = True)
 @commands.check(wrong_channel)
-#@commands.has_any_role('Cadet', "Membres VEAF")
+@commands.has_any_role('Cadet', "Membre VEAF")
 @commands.cooldown(1, 100, commands.BucketType.user)
 async def acti(ctx, *descInput): 
 	'''
@@ -183,8 +213,8 @@ async def acti(ctx, *descInput):
 		res = int(''.join(map(str, ReadyRoomChannel)))
 		channel = client.get_channel(res)
 		auteur = (ctx.author.name)
-		print(f"\nLa commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})...")
-		embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{content}\n\nRépondez avec la réaction \"<:signcheckicon:846110289388240947>\" si cette activité vous intéresse", color=0xDCAB00)
+		#print(time.strftime(f"""[%d/%m/%Y à %H:%I:%S]La commande \"&act\" est en cours d'execution par {auteur} ({ctx.author.id})..."""))
+		embed = discord.Embed(title=f"**Activité de {auteur}**", description=f"{content}\n\nRépondez avec la réaction <:signcheckicon:846110289388240947> si cette activité vous intéresse", color=0xDCAB00)
 #		embed.set_author(name="VEAF Bot")
 		embed.set_thumbnail(url = ctx.author.avatar_url)
 #		embed.add_field(name = "Date", value = dateInput.content)
@@ -192,11 +222,8 @@ async def acti(ctx, *descInput):
 #		embed.set_footer(text = random.choice(liste))
 		message = await channel.send(embed = embed)
 		await message.add_reaction("<:signcheckicon:846110289388240947>")
-		embed = discord.Embed(title=f"La commande a été exectué avec succès par {auteur}")
 		await ctx.send("<:signcheckicon:846110289388240947> Commande exectué avec succès !")
-		save = f"La commande \"&act\" a été exectué avec succès par {auteur} ({ctx.author.id}), contenu :\n Description : {content}"
-		print(save)
-		print(descInput)
+		print(time.strftime(f"""[%d/%m/%Y à %H:%I:%S] La commande \"&act\" a été exectué avec succès par {auteur} ({ctx.author.id}), contenu :\n Description : {content}"""))
 	else:
 		await ctx.send("<:signwarningicon:846112477997301771> Il faut faire suivre la commande `&acti` par la description de l'activité.\nPar exemple : `&acti Entrainement Ka-50 à 12h demain soir !`")
 	
@@ -204,19 +231,20 @@ async def acti(ctx, *descInput):
 #It's a basic &help command
 @client.command()
 @commands.has_permissions(send_messages = True)
-#@commands.check(wrong_channel)
+@commands.check(wrong_channel)
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def aide(ctx):
 	embed = discord.Embed(title=f"Documentation du bot :", description=f"Voici la liste des information importante :", color = 0xFF00FF)
-	embed.add_field(name = "Préfix : &", value = "Le préfix est a utliliser a chaque début de commmande\n ``Exemple : &commande``", inline=False)
+	embed.add_field(name = "Préfix : &", value = "Le préfix est à utiliser à chaque début de commmande\n ``Exemple : &commande``", inline=False)
 #	embed.add_field(name = "Commande act", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\"\n ``Utilisation : &act``", inline=True)
-	embed.add_field(name = "Commande acti", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\" en une seule ligne\n ``Utilisation : &acti [description]``", inline=True)
+	embed.add_field(name = "Commande acti", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\"\n ``Utilisation : &acti [description]``", inline=True)
 	embed.add_field(name = "Commande aide", value = "Cette commande permet d'afficher ce que vous êtes entrain de lire !\n ``Utilisation : &aide``", inline=True)
 	embed.add_field(name = "Commande say", value = "Cette commande permet de me faire dire ce que vous voulez\n ``Utilisation : &say [message]``", inline=True)
-	embed.add_field(name = "Commande clear", value = "Cette commande permet de supprimer les derniers messages envoyés dans le salon ou elle est exectué\n ``Utilisation : &clear [number]``", inline=True)
+	embed.add_field(name = "Commande clear", value = "Cette commande permet de supprimer les derniers messages envoyés dans le salon ou elle est exectué\n ``Utilisation : &clear [int]``", inline=True)
 	embed.add_field(name = "Commande serverinfo", value = "Cette commande permet d'afficher des informations sur le serveur\n ``Utilisation : &serverinfo``", inline=True)
 	embed.add_field(name = "Commande userinfo", value = "Cette commande permet d'afficher des informations sur un utilisateur spécifique\n ``Utilisation : &userinfo [Mention d'utilisateur]``", inline=True)
-#	embed.add_field(name = "Commande settings", value = "Cette commande permet de modifier des informations pour le bot\n ``Utilisation : &settings help``", inline=True)
+	embed.add_field(name = "Commande settings", value = "Cette commande permet d'afficher des informations sur les paramètres le bot\n ``Utilisation : &settings``", inline=True)
+	embed.add_field(name = "Commande autopurge", value = "Cette commande permet d'activer ou de désactiver la purge automatique\n ``Utilisation : &autopurge``", inline=True)
 	embed.add_field(name = "Commande où effetuer les commandes ?", value = "Vous devez effectuer les commandes de le salon ``:Salon Prévu a cette effet:``", inline=False)
 #	embed.set_footer(text = random.choice(liste))
 	embed.set_thumbnail(url = "https://bit.ly/3oyArah")
@@ -225,39 +253,48 @@ async def aide(ctx):
 	message = await ctx.send("<:paperplaneicon:846107877676154941> Vous avez un nouveau message !")
 	await message.add_reaction("📬")
 
-@client.command()
-@commands.has_permissions(send_messages = True)
-#@commands.check(wrong_channel)
-@commands.cooldown(1, 10, commands.BucketType.user)
-async def admin_aide(ctx):
-	embed = discord.Embed(title=f"Documentation du bot :", description=f"Voici la liste des information importante :", color = 0xFF00FF)
-	embed.add_field(name = "Préfix : &", value = "Le préfix est a utliliser a chaque début de commmande\n ``Exemple : &commande``", inline=False)
-#	embed.add_field(name = "Commande act", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\"\n ``Utilisation : &act``", inline=True)
-	embed.add_field(name = "Commande acti", value = "Cette commande permet de créer une activitée dans le salon \"Ready Room\" en une seule ligne\n ``Utilisation : &acti [description]``", inline=True)
-	embed.add_field(name = "Commande aide", value = "Cette commande permet d'afficher ce que vous êtes entrain de lire !\n ``Utilisation : &aide``", inline=True)
-	embed.add_field(name = "Commande say", value = "Cette commande permet de me faire dire ce que vous voulez\n ``Utilisation : &say [message]``", inline=True)
-	embed.add_field(name = "Commande clear", value = "Cette commande permet de supprimer les derniers messages envoyés dans le salon ou elle est exectué\n ``Utilisation : &clear [number]``", inline=True)
-	embed.add_field(name = "Commande serverinfo", value = "Cette commande permet d'afficher des informations sur le serveur\n ``Utilisation : &serverinfo``", inline=True)
-	embed.add_field(name = "Commande userinfo", value = "Cette commande permet d'afficher des informations sur un utilisateur spécifique\n ``Utilisation : &userinfo [Mention d'utilisateur]``", inline=True)
-#	embed.add_field(name = "Commande settings", value = "Cette commande permet de modifier des informations pour le bot\n ``Utilisation : &settings help``", inline=True)
-	embed.add_field(name = "Commande où effetuer les commandes ?", value = "Vous devez effectuer les commandes de le salon ``:Salon Prévu a cette effet:``", inline=False)
-#	embed.set_footer(text = random.choice(liste))
-	embed.set_thumbnail(url = "https://bit.ly/3oyArah")
-	#await ctx.send(embed = embed)
-	await ctx.send(embed = embed)
 
 #Purge messages
 @client.command()
 @commands.has_permissions(manage_messages = True)
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def clear(ctx, number : int):
-	await ctx.channel.purge(limit=number+1)
+	await ctx.channel.purge(limit=number+1, check=lambda msg: not msg.pinned)
 	embed = discord.Embed(title=f"♻️  **{number}** messages ont été supprimés avec succès  ♻️", color=0x00ff80)
 	await ctx.send(embed = embed)
 	await asyncio.sleep(2)
 	await ctx.channel.purge(limit=1)
 
 
+#Timed messages purge (For RRC)
+@client.command()
+@commands.has_permissions(manage_messages = True)
+@commands.cooldown(1, 10, commands.BucketType.user)
+async def autopurge(ctx):
+	global AutoPurgeOn
+	await ctx.channel.purge(limit=1)
+	if AutoPurgeOn == 0:
+		AutoPurgeOn = 1
+		await ctx.send(":recycle:  La purge automatique est maintenant activée dans ce salon !")
+		await asyncio.sleep(2)
+		await ctx.channel.purge(limit=1)
+		while True:
+			if AutoPurgeOn == 0:
+				break
+			timelimit = datetime.datetime.utcnow() - datetime.timedelta(hours=0, minutes=20)
+			await ctx.channel.purge(limit=100, before=timelimit, check=lambda msg: not msg.pinned)
+			#embed = discord.Embed(title=f"♻️  Les messages ont été supprimés avec succès  ♻️", color=0x00ff80)
+			#await ctx.send(embed = embed)
+			print(time.strftime(f"""[%d/%m/%Y à %H:%I:%S] La purge automatique à été effectuée avec succès ! ({ctx.channel})"""))
+			print("Les messages supprimés sont plus vieux que le", timelimit)
+			#await asyncio.sleep(2)
+			#await ctx.channel.purge(limit=1)
+			await asyncio.sleep(AutoPurgeTimer)
+	else:
+		await ctx.send(":recycle:  La purge automatique est maintenant désactivée dans ce salon !")
+		AutoPurgeOn = 0
+		await asyncio.sleep(2)
+		await ctx.channel.purge(limit=1)
 
 #Show server information
 @client.command()
@@ -265,13 +302,13 @@ async def clear(ctx, number : int):
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def serverinfo(ctx):
 	embed = discord.Embed(title = "Informations sur le serveur", color = 0xFFFFFE)
-	embed.add_field(name = "<:username:846107877798182923> Nom du serveur :", value= f"```{ctx.guild}```")
-	embed.add_field(name = "<:ide:846107878376210442> Id du serveur :", value= f"```{ctx.guild.id}```")
+	embed.add_field(name = "<:username:846107877798182923> Nom du serveur actuel :", value= f"```{ctx.guild}```")
+	embed.add_field(name = "<:ide:846107878376210442> Identifiant du serveur :", value= f"```{ctx.guild.id}```")
 	embed.add_field(name = "<:profilegroupicon:846109526398730260> Nombre de membres :", value= f"```{ctx.guild.member_count}```")
 	embed.add_field(name = "Nombre de salon textuels :", value= f"```{len(ctx.guild.text_channels)}```", inline = False)
 	embed.add_field(name = "Nombre de salon vocaux :", value= f"```{len(ctx.guild.voice_channels)}```", inline = True)
 	embed.add_field(name = "<:paperclipicon:846110289233575967> Propriétaire :", value=f"```{ctx.guild.owner}```", inline = False)
-	embed.add_field(name = "<:profileicon:846110952315289611> Nombre de rôle :", value= f"```{len(ctx.guild.roles)}```", inline = True)
+	embed.add_field(name = "<:profileicon:846110952315289611> Nombre de rôle total :", value= f"```{len(ctx.guild.roles)}```", inline = True)
 	embed.add_field(name = "<:nickname:846107877646139464> Salon du règlement :", value=f"```{ctx.guild.rules_channel}```", inline = True)
 	embed.add_field(name = "<:shieldokicon:847082332041117716> Niveau de vérification :", value= f"```{ctx.guild.verification_level}```", inline = True)
 #	embed.add_field(name = "Description :", value= ctx.guild.description, inline = True)
@@ -279,7 +316,7 @@ async def serverinfo(ctx):
 	embed.add_field(name = "<:pinicon:846110288973004802> Niveau de boost :", value = f"```{ctx.guild.premium_tier}```", inline = True)
 	embed.add_field(name = "<:bot:846107878057967666> Serveur créer le :", value = f"```{ctx.guild.created_at}```", inline = False)
 #	embed.set_footer(text = random.choice(liste))
-#	embed.set_thumbnail(url = ctx.guild.icon_url)
+	embed.set_thumbnail(url = ctx.guild.icon_url)
 	await ctx.send(embed = embed)
 
 
@@ -290,7 +327,7 @@ async def userinfo(ctx, *, user: discord.Member):
 	date_format = "%a, %d %b %Y %I:%M %p"
 	embed = discord.Embed(title = f"Information sur {user.name}")
 	embed.set_thumbnail(url=user.avatar_url)
-	embed.add_field(name="<:ide:846107878376210442> Id de l'utilisateur :", value=f"```{user.id}```", inline = False)
+	embed.add_field(name="<:ide:846107878376210442> Identifiant de l'utilisateur :", value=f"```{user.id}```", inline = False)
 	embed.add_field(name="<:bot:846107878057967666> Bot :", value=f"```{user.bot}```", inline = True)
 	embed.add_field(name="<:nickname:846107877646139464> Nickname :", value=f"```{user.display_name}```", inline = True)
 	embed.add_field(name="<:username:846107877798182923> Username :", value=f"```{user.name}```", inline = True)
@@ -318,12 +355,15 @@ async def settings(ctx):
 	fCommandChannel = data["CommandChannel"]
 	fJoinMessageChannel = data["JoinMessageChannel"]
 	fLeaveMessageChannel = data["LeaveMessageChannel"]
+	fAutoPurgeTimer = data["AutoPurgeTimer"]
 	embed = discord.Embed(title = "Listes des paramètres disponibles :", color = 0x666666)
 	embed.add_field(name = "ReadyRoomChannel", value = f"```{fReadyRoomChannel}\n```", inline = False)
 	embed.add_field(name = "CommandChannel", value = f"```{fCommandChannel}\n```", inline = False)
 	embed.add_field(name = "JoinMessageChannel", value = f"```{fJoinMessageChannel}\n```", inline = False)
 	embed.add_field(name = "LeaveMessageChannel", value = f"```{fLeaveMessageChannel}\n```", inline = False)
+	embed.add_field(name = "AutoPurgeTimer", value = f"```{fAutoPurgeTimer} secondes\n```", inline = False)
 	await ctx.send(embed = embed)
+	#EDITABLE SETTINGS (Via Commands) :
 #	global ReadyRoomChannel
 #	global CommandChannel
 #	global JoinMessageChannel
@@ -386,7 +426,7 @@ async def ping(ctx):
 	else:
 		embed=discord.Embed(title="<:shielderroricon:847082331365441537> Ping très haut ! <:shielderroricon:847082331365441537>", description=f":ping_pong: Pong! Le ping est de **{round(client.latency *1000)}** milliseconds!", color=0x990000)
 	await ctx.send(embed=embed)
-	print(f"Ping : {round(client.latency *1000)}ms")
+	print(f"Ping : {round(client.latency * 1000)}ms")
 
 @client.command()
 async def wcm_test(ctx):
@@ -410,32 +450,35 @@ async def wcm_test(ctx):
 async def on_command_error(ctx, error):
 	print(error)
 	if isinstance(error, commands.CommandOnCooldown):
-		await ctx.send(f"⌛ Cette commande est en cooldown, vous pourrez l'exectuter dans {round(error.retry_after, 1)} secondes (CommandOnCooldown)")
+		await ctx.send(f"⌛ Cette commande est en cooldown, vous pourrez l'exécuter dans {round(error.retry_after, 1)} secondes (CommandOnCooldown)")
 	elif isinstance(error, commands.MissingRequiredArgument):
-		await ctx.send("<:signwarningicon:846112477997301771> Au moins un argument est manquant, pour plus d'information, faites `&aide`. (MissingRequiredArgument)")
+		await ctx.send("<:signwarningicon:846112477997301771> Au moins un argument est manquant, pour plus d'informations, faites `&aide`. (MissingRequiredArgument)")
+	elif isinstance(error, discord.DMChannel):
+		await ctx.send(f"<:mapmarkericon:846110289203560448> La commande doit être exectué dans un serveur (DMChannel)")
 	elif isinstance(error, commands.MissingPermissions):
-		await ctx.send("<:shieldwarningicon:847082331823144961> Vous ne possédez pas les permissions requise pour exectuer cette commande ! (MissingPermissions)")
-	elif isinstance(error, commands.CheckFailure):
-		await ctx.send("Une erreur est survenue, si le problème persiste, veuillez contacter le développeur (CheckFailure)")
+		await ctx.send("<:shieldwarningicon:847082331823144961> Vous ne possédez pas la/les permission(s) requise pour exectuer cette commande ! (MissingPermissions)")
 	elif isinstance(error, commands.CommandNotFound):
 		await ctx.send("<:signwarningicon:846112477997301771> Votre demande est inconue ! Si vous n'êtes pas sur de l'orthographe de votre requête, `faites &aide` (CommmandNotFound)")
+	elif isinstance(error, commands.MissingAnyRole):
+		await ctx.send(f"<:shielderroricon:847082331365441537> Il vous manque un role pour effecter cette commande.")
 	elif isinstance(error, commands.BotMissingPermissions):
 		await ctx.send("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur.")
 		print("On dirai que je n'ai pas la permission d'effectuer ceci, veuillez contacter un administrateur.")
-	elif isinstance(error.original, discord.Forbidden):
-		await ctx.send("<:shieldwarningicon:847082331823144961> On dirai que vous n'avez pas la permission d'effectuer ceci ! <:shieldwarningicon:847082331823144961> (Forbidden)")
+	elif isinstance(error, commands.MemberNotFound):
+		await ctx.send("<:username:846107877798182923> L'utilisateur est introuvable, vérifiez l'orthographe et réessayer. (MemberNotFound)")
+	elif isinstance(error, commands.BadArgument):
+		await ctx.send("<:signwarningicon:846112477997301771> Une erreur est survenue durant la conversion, veuillez réessayer (BadArgument)")
+#	elif isinstance(error.original, discord.Forbidden):
+#		await ctx.send("<:shieldwarningicon:847082331823144961> On dirai que vous n'avez pas la permission d'effectuer ceci ! <:shieldwarningicon:847082331823144961> (Forbidden)")
 	elif isinstance(error, commands.ConversionError):
 		await ctx.send("<:shieldwarningicon:847082331823144961> Une erreur est survenue durant la conversion, veuillez réessayer (ConversionError)")
-	elif isinstance(error, commands.BadArgument):
-		await ctx.send("Une erreur est survenue durant la conversion, veuillez réessayer (BadArgument)")
 	elif isinstance(error, commands.PrivateMessageOnly):
 		await ctx.send("Cette commande doit être effectuée en message privé (PrivateMessageOnly)")
-	elif isinstance(error, commands.MemberNotFound):
-		await ctx.send("<:username:846107877798182923> L'utilisateur entré est introuvable... (MemberNotFound)")
-	elif isinstance(error, commands.MissingAnyRole):
-		await ctx.send(f"<:shielderroricon:847082331365441537> Il vous manque le role {missing_roles} pour effecter cette commande.")
-	elif isinstance(error, discord.DMChannel):
-		await ctx.send(f"<:mapmarkericon:846110289203560448> La commande doit être exectué dans un serveur (DMChannel)")
+	elif isinstance(error, commands.CheckFailure):
+		message = await ctx.send("<:signwarningicon:846112477997301771> Une erreur est survenue, veuillez vérifier les faits suivant :\n-La commande est exectuté dans le bon salon\n-Vos arguments sont correctes\nSi le problème persiste, veuillez contacter le développeur/un administateur (CheckFailure)")
+		await asyncio.sleep(7)
+		await message.delete()
+
 
 #Dynamic rich presence
 async def update_presence():
@@ -456,12 +499,5 @@ os.system("color 07")
 
 
 '''
-Tout doux : 
-
-Ok - Commande &say en embed
-Ok - Commande &act désactivé et plus dans &aide 
-Ok - Settings => Fichier Json
-Ok - &aide en message privé
-Ok - on_member_join en message privé
-Ok - on_member_join doit lire un message dans un fichier .md
+Tout doux : / 
 '''

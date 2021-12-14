@@ -1,2 +1,10 @@
-discord.py
+random
+os
+time
+pickle
+discord
 asyncio
+json
+markdown
+logging
+datetime
