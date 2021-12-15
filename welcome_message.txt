@@ -1,8 +1,0 @@
-<p>Bonjour !
-Comment ça va ? 
-Moi ça va ❤
-<em>Et toi ça va</em> ?
-<strong>Trop cool !</strong>
-<code>J'espère que tu te sens bien ici</code>
-<code>C'est mon petit chez moi quoi ^^</code></p>
-<p>Tu t'y plaira ?</p>

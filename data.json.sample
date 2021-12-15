@@ -1,0 +1,12 @@
+{
+	"ServerID": 43254543543534,
+	"_ServerID": "Your server ID as an integer",
+	"CommandChannel": 34534535465465,
+	"_CommandChannel": "The command channel ID as an integer ; this is the channel where you will run the bot commands",
+	"AutopurgedChannel": 7565476565,
+	"_AutopurgedChannel": "The autopurged channel ID as an integer ; this is the channel which will be handled by the autopurge command",
+	"AutoPurgeTimerInMinutes" : 1,
+	"_AutoPurgeTimerInMinutes" : "The autopurge command will automatically purge the <AutopurgedChannel> every <AutoPurgeTimerInMinutes> minutes",
+	"AutoPurgeMaxMessageAgeInMinutes" : 10,
+	"_AutoPurgeMaxMessageAgeInMinutes" : "The <AutopurgedChannel> messages older than <AutoPurgeMaxMessageAgeInMinutes> minutes (and not pinned) will be deleted by the autopurge command"
+}

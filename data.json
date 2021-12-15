@@ -1,9 +1,0 @@
-{
-	"ReadyRoomChannel": "845299069882728500",
-	"CommandChannel": "845299225742540820",
-	"JoinMessageChannel": "845299041083981867", 
-	"LeaveMessageChannel": "845299041083981867", 
-	"AutoPurgeTimer" : "10",
-	"LogLevelInfo": "INFO",
-	"_comment":  "LogLevelInfo peut être DEBUG INFO WARNING ERROR CRITICAL"
-}
