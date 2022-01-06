@@ -59,9 +59,9 @@ AutoPurgeMaxMessageAgeInMinutes = int(data["AutoPurgeMaxMessageAgeInMinutes"])
 AutoPurgeTimer = int(data["AutoPurgeTimerInMinutes"]) * 60
 AutoPurgeOn = 0
 AutoTriggerAutoPurge = data["AutoTriggerAutoPurge"]
-if AutoTriggerAutoPurge == 1 or AutoTriggerAutoPurge == 0
+if AutoTriggerAutoPurge == 1 or AutoTriggerAutoPurge == 0:
 	AutoTriggerAutoPurge = bool(AutoTriggerAutoPurge)
-except:
+else:
 	print("An exception occured in the data.json file, AutoTriggerAutoPurge must be 0 or 1 (as an integer)")
 	errorCatched += 1
 
