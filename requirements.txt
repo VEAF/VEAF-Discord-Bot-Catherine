@@ -1,4 +1,3 @@
-discord
 asyncio
-logging
 datetime
+discord
