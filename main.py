@@ -36,6 +36,7 @@ from discord.ext import commands
 from discord.ext import tasks
 
 version = "0.0.1"
+errorCatched = 0
 
 def printAndLog(msg):
 	print(msg)	
@@ -57,13 +58,34 @@ AutopurgedChannel = data["AutopurgedChannel"]
 AutoPurgeMaxMessageAgeInMinutes = int(data["AutoPurgeMaxMessageAgeInMinutes"])
 AutoPurgeTimer = int(data["AutoPurgeTimerInMinutes"]) * 60
 AutoPurgeOn = 0
+AutoTriggerAutoPurge = data["AutoTriggerAutoPurge"]
+if AutoTriggerAutoPurge == 1 or AutoTriggerAutoPurge == 0
+	AutoTriggerAutoPurge = bool(AutoTriggerAutoPurge)
+except:
+	print("An exception occured in the data.json file, AutoTriggerAutoPurge must be 0 or 1 (as an integer)")
+	errorCatched += 1
 
 client = commands.Bot(command_prefix = "&", intents=intents) #Change the "&" to change the bot's prefix
+
+async def _purge():
+	while True:
+		if AutoPurgeOn == 0:
+			break
+		purgedChannel, timelimit = preparePurge(client, AutoPurgeMaxMessageAgeInMinutes)
+		await purgedChannel.purge(limit=500, before=timelimit, check=lambda msg: not msg.pinned)
+		await asyncio.sleep(AutoPurgeTimer)
 
 @client.event
 async def on_ready():
 	printAndLog('Enregistré avec succès en tant que {0.user}'.format(client)) #This message is shown on the console when the bot is ready
 	client.loop.create_task(update_presence()) #Enable dynamic RichPresence
+	if AutoTriggerAutoPurge:
+		global AutoPurgeOn
+		if AutoPurgeOn == 0:
+			AutoPurgeOn = 1
+			printAndLog("Enabling automatic purge")
+			#await ctx.send(":recycle:  La purge automatique est maintenant activée !")
+			await _purge()
 
 #Message when the bot got removed from a server
 @client.event
@@ -93,7 +115,7 @@ async def aide(ctx):
 		embed.set_thumbnail(url = "https://bit.ly/3oyArah")
 		await ctx.author.send(embed = embed)
 	else:
-		await ctx.author.send("Catherine est un bot réservé aux administrateurs, et ne répond qu'aux commandes envoyées dans le salon ``#catherine-command-channel``")
+		await ctx.author.send("Catherine est un bot actuellement réservé aux administrateurs, et ne répond qu'aux commandes envoyées dans le salon ``#catherine-command-channel``")
 
 def preparePurge(client, minutes):
 		timelimit = datetime.datetime.utcnow() - datetime.timedelta(minutes=minutes)
@@ -109,7 +131,7 @@ async def purge(ctx, minutes:int=AutoPurgeMaxMessageAgeInMinutes):
 		purgedChannel, timelimit = preparePurge(client, minutes)
 		await purgedChannel.purge(limit=500, before=timelimit, check=lambda msg: not msg.pinned)
 
-#Timed messages purge (For RRC)
+#Timed messages purge
 @client.command()
 @commands.has_permissions(manage_messages = True)
 async def autopurge(ctx):
@@ -119,16 +141,16 @@ async def autopurge(ctx):
 			AutoPurgeOn = 1
 			printAndLog("Enabling automatic purge")
 			await ctx.send(":recycle:  La purge automatique est maintenant activée !")
-			while True:
-				if AutoPurgeOn == 0:
-					break
-				purgedChannel, timelimit = preparePurge(client, AutoPurgeMaxMessageAgeInMinutes)
-				await purgedChannel.purge(limit=500, before=timelimit, check=lambda msg: not msg.pinned)
-				await asyncio.sleep(AutoPurgeTimer)
+			await _purge()
 		else:
 			printAndLog("Disabling automatic purge")
 			await ctx.send(":recycle:  La purge automatique est maintenant désactivée !")
 			AutoPurgeOn = 0
+
+@client.command()
+@commands.has_permissions(manage_messages = True)
+async def test(ctx):
+	print(ctx)
 
 #Error management
 @client.event
@@ -175,11 +197,12 @@ async def update_presence():
 		await client.change_presence(activity=discord.Game(name="Ce bot est le bot offciel de la VEAF"))
 		await asyncio.sleep(5)
 
-
-token = open("token.txt","r").readline() #Put your token in this file (token.txt)
-client.run(token) #/!\ DO NOT SHARE YOUR TOKEN ! /!\
-
-printAndLog("VEAF Bot is shutting down... Bye bye !") #The bot is shutting down...
+if errorCatched == 0:
+	token = open("token.txt","r").readline() #Put your token in this file (token.txt)
+	client.run(token) #/!\ DO NOT SHARE YOUR TOKEN ! /!\
+	printAndLog("[i] VEAF Bot is shutting down... Bye bye !") #The bot is shutting down...
+else:
+	printAndLog("[!] Some exception occured, aborting...")
 
 
 '''
