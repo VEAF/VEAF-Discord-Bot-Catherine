@@ -147,11 +147,6 @@ async def autopurge(ctx):
 			await ctx.send(":recycle:  La purge automatique est maintenant désactivée !")
 			AutoPurgeOn = 0
 
-@client.command()
-@commands.has_permissions(manage_messages = True)
-async def test(ctx):
-	print(ctx)
-
 #Error management
 @client.event
 async def on_command_error(ctx, error):
@@ -185,7 +180,6 @@ async def on_command_error(ctx, error):
 		message = await ctx.send("<:signwarningicon:846112477997301771> Une erreur est survenue, veuillez vérifier les faits suivant :\n-La commande est exectuté dans le bon salon\n-Vos arguments sont correctes\nSi le problème persiste, veuillez contacter le développeur/un administateur (CheckFailure)")
 		await asyncio.sleep(7)
 		await message.delete()
-
 
 #Dynamic rich presence
 async def update_presence():
