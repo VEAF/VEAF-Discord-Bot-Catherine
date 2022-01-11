@@ -15,7 +15,6 @@ Catherine is coded on Python 3.10, and uses the following libraries:
 
 - discord
 - asyncio
-- logging
 - datetime
 
 You can download and install them with **pip** with the following command :
